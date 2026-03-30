@@ -11,9 +11,8 @@ const shopSchema = new mongoose.Schema({
   },
   products: [
     {
-      name: { type: String, required: true },
-      price: { type: Number, required: true },
-      image: { type: String, default: '' },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
     },
   ],
 });
