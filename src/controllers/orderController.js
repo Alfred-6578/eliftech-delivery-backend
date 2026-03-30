@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const Coupon = require('../models/Coupon');
 
 exports.getOrders = async (req, res) => {
   try {
@@ -29,12 +30,22 @@ exports.getOrderById = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { name, email, phone, address, shops } = req.body;
+    const { name, email, phone, address, shops, couponCode } = req.body;
 
-    const totalPrice = shops.reduce((total, s) => {
+    let totalPrice = shops.reduce((total, s) => {
       s.subtotal = s.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
       return total + s.subtotal;
     }, 0);
+
+    let discount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+      if (!coupon) return res.status(400).json({ message: 'Coupon not found' });
+      if (!coupon.isActive) return res.status(400).json({ message: 'Coupon is inactive' });
+      if (coupon.expiresAt < new Date()) return res.status(400).json({ message: 'Coupon has expired' });
+      discount = coupon.discount;
+      totalPrice = totalPrice - (totalPrice * discount) / 100;
+    }
 
     const order = await Order.create({ name, email, phone, address, shops, totalPrice });
     res.status(201).json(order);
