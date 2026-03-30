@@ -12,5 +12,6 @@ app.use(express.json());
 app.use('/api/shops', require('./routes/shopRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/coupons', require('./routes/couponRoutes'));
 
 module.exports = app;
