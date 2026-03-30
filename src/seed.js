@@ -2,6 +2,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Shop = require('./models/Shop');
 const Product = require('./models/Product');
+const Order = require('./models/Order');
+const Coupon = require('./models/Coupon');
 
 const shopsData = [
   {
@@ -56,11 +58,24 @@ const shopsData = [
   },
 ];
 
+const couponsData = [
+  { code: 'SAVE10', discount: 10, expiresAt: new Date('2027-01-01') },
+  { code: 'SAVE20', discount: 20, expiresAt: new Date('2027-01-01') },
+  { code: 'HALFOFF', discount: 50, expiresAt: new Date('2027-06-01') },
+  { code: 'EXPIRED5', discount: 5, isActive: false, expiresAt: new Date('2025-01-01') },
+];
+
 const seed = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     await Shop.deleteMany();
     await Product.deleteMany();
+    await Order.deleteMany();
+    await Coupon.deleteMany();
+
+    // Seed shops and products
+    const createdShops = [];
+    const createdProducts = [];
 
     for (const shopData of shopsData) {
       const shop = await Shop.create({ name: shopData.name, image: shopData.image });
@@ -69,9 +84,42 @@ const seed = async () => {
       );
       shop.products = products.map((p) => p._id);
       await shop.save();
+      createdShops.push(shop);
+      createdProducts.push(...products);
     }
 
-    console.log('Database seeded with dummy shops and products');
+    // Seed coupons
+    await Coupon.insertMany(couponsData);
+
+    // Seed sample orders
+    await Order.insertMany([
+      {
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '1234567890',
+        address: '123 Main St',
+        shop: createdShops[0]._id,
+        items: [
+          { product: createdProducts[0]._id, quantity: 2 },
+          { product: createdProducts[2]._id, quantity: 1 },
+        ],
+        totalPrice: createdProducts[0].price * 2 + createdProducts[2].price,
+      },
+      {
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        phone: '0987654321',
+        address: '456 Oak Ave',
+        shop: createdShops[1]._id,
+        items: [
+          { product: createdProducts[4]._id, quantity: 1 },
+          { product: createdProducts[5]._id, quantity: 3 },
+        ],
+        totalPrice: createdProducts[4].price + createdProducts[5].price * 3,
+      },
+    ]);
+
+    console.log('Database seeded: shops, products, orders, and coupons');
     process.exit(0);
   } catch (err) {
     console.error('Seed error:', err.message);
