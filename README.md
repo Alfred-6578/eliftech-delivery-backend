@@ -2,7 +2,6 @@
 
 Backend API for the ElifTech Food Delivery web application where users can order food delivery from various shops.
 
-**Accomplished level: Advanced**
 
 ## Tech Stack
 
@@ -92,20 +91,3 @@ npm start
 | PUT    | /api/coupons/:id               | Update a coupon     |
 | DELETE | /api/coupons/:id               | Delete a coupon     |
 
-## Features
-
-### Base Level
-- Shop listing with product data from the database
-- Shopping cart with order submission (name, email, phone, address)
-- Order validation and persistence
-
-### Middle Level
-- Product filtering by category
-- Product sorting (price asc/desc, name A-Z)
-- Shop filtering by rating
-
-### Advanced Level
-- Pagination / infinite scroll support
-- Reorder previous orders
-- Order history lookup by email, phone, or order ID
-- Coupon system with validation and discounts
