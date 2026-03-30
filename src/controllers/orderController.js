@@ -2,7 +2,11 @@ const Order = require('../models/Order');
 
 exports.getOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    const { email, phone } = req.query;
+    if (!email || !phone) {
+      return res.status(400).json({ message: 'Email and phone are required' });
+    }
+    const orders = await Order.find({ email, phone })
       .populate('shops.shop', 'name')
       .populate('shops.items.product', 'name price');
     res.json({ total: orders.length, orders });
